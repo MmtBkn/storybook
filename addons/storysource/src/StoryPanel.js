@@ -220,7 +220,7 @@ export default class StoryPanel extends Component {
         files={{
           ...localDependencies,
           [indexJs]: { code: source },
-          '/storybook/bootstrapper.js': { code: 'console.log("Say Hello Joe");' },
+          '/storysource/bootstrapper.js': { code: 'console.log("Say Hello Joe");' },
         }}
         dependencies={Object.assign({}, ...(dependencies || []).map(d => ({ [d]: 'latest' })))}
         entry={indexJs}
