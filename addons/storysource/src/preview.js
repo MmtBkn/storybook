@@ -18,13 +18,21 @@ function setStorySource(
   } = context;
 
   channel.emit(STORY_EVENT_ID, {
-    source,
-    currentLocation,
-    mainFileLocation,
-    locationsMap,
-    fileName,
-    dependencies,
-    localDependencies,
+    edition: {
+      source,
+      mainFileLocation,
+      fileName,
+      dependencies,
+      localDependencies,
+    },
+    story: {
+      kind: context.kind,
+      story: context.story,
+    },
+    location: {
+      currentLocation,
+      locationsMap,
+    },
   });
 }
 

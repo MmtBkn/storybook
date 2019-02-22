@@ -37,17 +37,15 @@ export default class StoryPanel extends Component {
   }
 
   listener = ({
-    fileName,
-    source,
-    currentLocation,
-    locationsMap,
-    dependencies,
-    localDependencies,
-    mainFileLocation,
+    edition: { source, mainFileLocation, fileName, dependencies, localDependencies },
+    story: { story, kind },
+    location: { currentLocation, locationsMap },
   }) => {
     const locationsKeys = getLocationKeys(locationsMap);
 
     this.setState({
+      story,
+      kind,
       fileName,
       source,
       dependencies,
@@ -59,6 +57,8 @@ export default class StoryPanel extends Component {
     });
 
     console.log({
+      story,
+      kind,
       fileName,
       source,
       currentLocation,
@@ -210,12 +210,18 @@ export default class StoryPanel extends Component {
       dependencies,
       localDependencies,
       fileExplorerWidth,
+      story, // eslint-disable-line no-unused-vars
+      kind, // eslint-disable-line no-unused-vars
     } = this.state;
     const indexJs = mainFileLocation || '/index.js';
     return active ? (
       <SandpackProvider
         style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'row' }}
-        files={{ ...localDependencies, [indexJs]: { code: source } }}
+        files={{
+          ...localDependencies,
+          [indexJs]: { code: source },
+          '/storybook/bootstrapper.js': { code: 'console.log("Say Hello Joe");' },
+        }}
         dependencies={Object.assign({}, ...(dependencies || []).map(d => ({ [d]: 'latest' })))}
         entry={indexJs}
       >

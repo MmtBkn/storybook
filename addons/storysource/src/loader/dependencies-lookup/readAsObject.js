@@ -20,7 +20,7 @@ function extractLocalDependenciesFrom(tree) {
     {},
     ...Object.entries(tree || {}).map(([thisPath, value]) =>
       Object.assign(
-        { [thisPath]: value.source },
+        { [thisPath]: { code: value.source } },
         extractLocalDependenciesFrom(value.localDependencies)
       )
     )
@@ -94,7 +94,9 @@ export function readAsObject(classLoader, inputSource) {
         .filter(d => d[0] !== '.' && d[0] !== '/')
         .map(d => (d[0] === '@' ? `${d.split('/')[0]}/${d.split('/')[1]}` : d.split('/')[0])),
       localDependencies: Object.assign(
-        ...Object.entries(localDependencies).map(([name, value]) => ({ [name]: value.source })),
+        ...Object.entries(localDependencies).map(([name, value]) => ({
+          [name]: { code: value.source },
+        })),
         extractLocalDependenciesFrom(localDependencies)
       ),
     }));
