@@ -56,7 +56,7 @@ export function readAsObject(classLoader, inputSource) {
             resolve({
               d,
               err,
-              dependencyFile,
+              dependencyFile: theModule._source && theModule._source._value || dependencyFile,
               sourceMap,
               theModule,
             });
