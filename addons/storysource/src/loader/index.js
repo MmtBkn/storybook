@@ -1,8 +1,8 @@
-import { readAsObject } from './dependencies-lookup/readAsObject';
+import { readStory } from './dependencies-lookup/readAsObject';
 import { getRidOfUselessFilePrefixes } from './dependencies-lookup/getRidOfUselessFilePrefixes';
 
 function transform(inputSource) {
-  return readAsObject(this, inputSource)
+  return readStory(this, inputSource)
     .then(getRidOfUselessFilePrefixes)
     .then(
       ({ resource, source, sourceJson, addsMap, dependencies, localDependencies }) => `

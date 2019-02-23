@@ -27,7 +27,7 @@ function extractLocalDependenciesFrom(tree) {
   );
 }
 
-export function readAsObject(classLoader, inputSource) {
+function readAsObject(classLoader, inputSource, mainFile) {
   const options = getOptions(classLoader) || {};
   const result = injectDecorator(
     inputSource,
@@ -42,7 +42,7 @@ export function readAsObject(classLoader, inputSource) {
 
   const addsMap = result.addsMap || {};
   const dependencies = result.dependencies || [];
-  const source = result.source || inputSource;
+  const source = mainFile ? result.source : inputSource;
   const resource = classLoader.resourcePath || classLoader.resource;
 
   const moduleDependencies = (result.dependencies || []).filter(d => d[0] === '.' || d[0] === '/');
@@ -52,13 +52,22 @@ export function readAsObject(classLoader, inputSource) {
     workspaceFileNames.map(
       d =>
         new Promise(resolve =>
-          classLoader.loadModule(d, (err, dependencyFile, sourceMap, theModule) => {
-            resolve({
-              d,
-              err,
-              dependencyFile: theModule._source && theModule._source._value || dependencyFile,
-              sourceMap,
-              theModule,
+          classLoader.loadModule(d, (err1, compiledSource, sourceMap, theModule) => {
+            if (err1) {
+              classLoader.emitError(err1);
+            }
+            classLoader.fs.readFile(theModule.resource, (err2, dependencyInputData) => {
+              if (err2) {
+                classLoader.emitError(err2);
+              }
+              resolve({
+                d,
+                err: err1 || err2,
+                inputSource: dependencyInputData.toString(),
+                compiledSource,
+                sourceMap,
+                theModule,
+              });
             });
           })
         )
@@ -66,13 +75,13 @@ export function readAsObject(classLoader, inputSource) {
   )
     .then(data =>
       Promise.all(
-        data.map(({ dependencyFile, theModule }) =>
+        data.map(({ inputSource: dependencyInputSource, theModule }) =>
           readAsObject(
             Object.assign({}, classLoader, {
               resourcePath: theModule.resourcePath,
               resource: theModule.resource,
             }),
-            dependencyFile
+            dependencyInputSource
           )
         )
       ).then(moduleObjects =>
@@ -100,4 +109,8 @@ export function readAsObject(classLoader, inputSource) {
         extractLocalDependenciesFrom(localDependencies)
       ),
     }));
+}
+
+export function readStory(classLoader, inputSource) {
+  return readAsObject(classLoader, inputSource, true);
 }
